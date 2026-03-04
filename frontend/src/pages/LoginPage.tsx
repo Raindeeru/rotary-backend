@@ -2,6 +2,8 @@ import { FormEvent, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginRequest } from '../lib/api';
 
+const API_BASE = 'http://localhost:8000';
+
 export function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -20,8 +22,19 @@ export function LoginPage() {
 
     setLoading(true);
     try {
-      await loginRequest(username, password);
-      navigate('/admin', { replace: true });
+      const { access_token } = await loginRequest(username, password);
+
+      // Fetch the user's role to decide where to redirect
+      const userRes = await fetch(`${API_BASE}/user`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
+
+      if (!userRes.ok) throw new Error('Could not verify user role.');
+
+      const user = await userRes.json();
+      const destination = user.role === 'Admin' ? '/admin' : '/member';
+      navigate(destination, { replace: true });
+
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Unable to log in right now.',
@@ -76,10 +89,9 @@ export function LoginPage() {
         </form>
 
         <p className="auth__hint">
-          New to the app? <Link to="/register">Create an account</Link>.
+          Interested in joining? <Link to="/register">Get an Invite</Link>.
         </p>
       </div>
     </main>
   );
 }
-

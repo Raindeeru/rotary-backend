@@ -28,8 +28,8 @@ export function HomePage({ backendError }: HomePageProps) {
       {/* Hero */}
       <section className="hero">
         <div className="hero__content">
-          <h1 className="hero__title">Rotary</h1>
-          <p className="hero__subtitle">Short Statement</p>
+          <h1 className="hero__title">Rotary Club of San Fernando, Pampanga</h1>
+          <p className="hero__subtitle">We strive to improve the quality of life in Pampanga through accountability, partnership, and sustainable impact.</p>
           <div className="hero__actions">
             <button type="button" className="hero__primary-cta">View Projects</button>
             <Link to="/register" className="hero__secondary-cta" style={{ textDecoration: 'none', display: 'inline-block' }}>

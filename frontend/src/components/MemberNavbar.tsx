@@ -1,21 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 
-export type AdminTab = 'home' | 'members' | 'projects' | 'events' | 'profile';
+export type MemberTab = 'home' | 'projects' | 'events' | 'profile';
 
-const TABS: { id: AdminTab; label: string }[] = [
+const TABS: { id: MemberTab; label: string }[] = [
   { id: 'home',     label: 'Home' },
-  { id: 'members',  label: 'Members' },
   { id: 'projects', label: 'Projects' },
   { id: 'events',   label: 'Events' },
   { id: 'profile',  label: 'Profile' },
 ];
 
-type AdminNavbarProps = {
-  activeTab: AdminTab;
-  onTabChange: (tab: AdminTab) => void;
+type MemberNavbarProps = {
+  activeTab: MemberTab;
+  onTabChange: (tab: MemberTab) => void;
 };
 
-export function AdminNavbar({ activeTab, onTabChange }: AdminNavbarProps) {
+export function MemberNavbar({ activeTab, onTabChange }: MemberNavbarProps) {
   const navigate = useNavigate();
 
   function handleLogout() {

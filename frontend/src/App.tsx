@@ -7,12 +7,13 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { MemberDashboardPage } from './pages/MemberDashboardPage';
 
 type BackendStatus = { 'Connection Status'?: string };
 
 function AppShell() {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/member');
 
   const [backendStatus, setBackendStatus] = useState<BackendStatus | null>(null);
   const [backendError, setBackendError] = useState<string | null>(null);
@@ -33,8 +34,8 @@ function AppShell() {
   }, []);
 
   return (
-    <div className={isAdmin ? 'dash-page' : 'page'}>
-      {!isAdmin && <Navbar />}
+    <div className={isDashboard ? 'dash-page' : 'page'}>
+      {!isDashboard && <Navbar />}
 
       <Routes>
         <Route path="/" element={<HomePage backendStatus={backendStatus} backendError={backendError} />} />
@@ -48,9 +49,17 @@ function AppShell() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/member"
+          element={
+            <ProtectedRoute>
+              <MemberDashboardPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
-      {!isAdmin && <Footer />}
+      {!isDashboard && <Footer />}
     </div>
   );
 }
