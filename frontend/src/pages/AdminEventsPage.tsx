@@ -16,6 +16,22 @@ type FullEvent = {
   admin_id: number | null;
 };
 
+type Expense = {
+  id: number;
+  description: string;
+  category: string;
+  quantity: number;
+  price: number;
+  location: string;
+  date_purchased: string;
+};
+
+type EventFinancial = {
+  event_id: number;
+  total_spent: number;
+  expenses: Expense[];
+};
+
 function TypePill({ type }: { type: string }) {
   const map: Record<string, string> = {
     'Meeting': 'event-type--meeting',
@@ -32,6 +48,9 @@ export function AdminEventsPage() {
 
   // Detail view
   const [selected, setSelected] = useState<FullEvent | null>(null);
+  const [detailTab, setDetailTab] = useState<'details' | 'finances'>('details');
+  const [financial, setFinancial] = useState<EventFinancial | null>(null);
+  const [finLoading, setFinLoading] = useState(false);
 
   // Add modal
   const [showAdd, setShowAdd] = useState(false);
@@ -44,6 +63,12 @@ export function AdminEventsPage() {
   const [editForm, setEditForm] = useState({ title: '', description: '', date: '', event_type: 'Meeting' });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Edit finances modal
+  const [showEditFin, setShowEditFin] = useState(false);
+  const [newExpense, setNewExpense] = useState({ description: '', category: '', quantity: '1', price: '', location: '', date_purchased: '' });
+  const [expenseError, setExpenseError] = useState<string | null>(null);
+  const [expenseLoading, setExpenseLoading] = useState(false);
 
   const [coverImg, setCoverImg] = useState<string | null>(() => {
     return localStorage.getItem('events_cover_img') ?? null;
@@ -76,8 +101,25 @@ export function AdminEventsPage() {
 
   useEffect(() => { loadEvents(); }, []);
 
-  function openEvent(e: FullEvent) {
-    setSelected(e);
+  async function loadFinancial(id: number) {
+    setFinLoading(true);
+    setFinancial(null);
+    try {
+      const res = await fetch(`${API_BASE}/events/${id}/financials`, { headers: authHeaders() });
+      if (res.ok) setFinancial(await res.json());
+    } catch { /* ignore */ }
+    finally { setFinLoading(false); }
+  }
+
+  function openEvent(ev: FullEvent) {
+    setSelected(ev);
+    setDetailTab('details');
+    setFinancial(null);
+  }
+
+  function switchDetailTab(tab: 'details' | 'finances') {
+    setDetailTab(tab);
+    if (tab === 'finances' && selected && !financial) loadFinancial(selected.id);
   }
 
   async function handleAdd() {
@@ -152,6 +194,48 @@ export function AdminEventsPage() {
     } catch { /* ignore */ }
   }
 
+  function openEditFinances() {
+    setNewExpense({ description: '', category: '', quantity: '1', price: '', location: '', date_purchased: '' });
+    setExpenseError(null);
+    setShowEditFin(true);
+  }
+
+  async function handleAddExpense() {
+    if (!selected) return;
+    setExpenseError(null);
+    if (!newExpense.description.trim() || !newExpense.price) { setExpenseError('Description and price are required.'); return; }
+    setExpenseLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/events/${selected.id}/financials`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: newExpense.description,
+          category: newExpense.category || 'General',
+          quantity: parseInt(newExpense.quantity) || 1,
+          price: parseFloat(newExpense.price) || 0,
+          location: newExpense.location || 'N/A',
+          date_purchased: newExpense.date_purchased ? new Date(newExpense.date_purchased).toISOString() : new Date().toISOString(),
+        }),
+      });
+      if (!res.ok) { const b = await res.json(); throw new Error(b?.detail ?? 'Failed'); }
+      setNewExpense({ description: '', category: '', quantity: '1', price: '', location: '', date_purchased: '' });
+      loadFinancial(selected.id);
+    } catch (err) { setExpenseError(err instanceof Error ? err.message : 'Error'); }
+    finally { setExpenseLoading(false); }
+  }
+
+  async function handleDeleteExpense(expenseId: number) {
+    if (!selected) return;
+    try {
+      await fetch(`${API_BASE}/events/${selected.id}/financials/${expenseId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      loadFinancial(selected.id);
+    } catch { /* ignore */ }
+  }
+
   // ── Detail view ──
   if (selected) {
     return (
@@ -171,24 +255,73 @@ export function AdminEventsPage() {
           </div>
         </div>
 
-        <div className="proj-detail__body" style={{ borderTop: '1px solid #e5e7eb', borderRadius: '0 0 0.75rem 0.75rem' }}>
-          <div className="proj-detail__desc">
-            <div className="proj-detail__meta" style={{ marginBottom: '1rem' }}>
-              <span><strong>Date:</strong> {new Date(selected.date).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-              <span><strong>Type:</strong> <TypePill type={selected.event_type} /></span>
-            </div>
-            <p>{selected.description || 'No description provided.'}</p>
-            <button
-              className="proj-fin__delete-btn"
-              style={{ marginTop: '1.5rem', color: '#b91c1c', fontSize: '0.82rem', border: '1px solid #fca5a5', borderRadius: '0.4rem', padding: '0.4rem 0.9rem' }}
-              onClick={handleDelete}
-            >
-              Delete Event
-            </button>
-          </div>
+        <div className="proj-detail__tabs">
+          <button
+            className={`proj-detail__tab${detailTab === 'details' ? ' proj-detail__tab--active' : ''}`}
+            onClick={() => switchDetailTab('details')}
+          >DETAILS</button>
+          <button
+            className={`proj-detail__tab${detailTab === 'finances' ? ' proj-detail__tab--active' : ''}`}
+            onClick={() => switchDetailTab('finances')}
+          >FINANCES</button>
         </div>
 
-        {/* Edit modal */}
+        <div className="proj-detail__body">
+          {detailTab === 'details' && (
+            <div className="proj-detail__desc">
+              <p>{selected.description || 'No description provided.'}</p>
+              <div className="proj-detail__meta">
+                <span><strong>Date:</strong> {new Date(selected.date).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                <span><strong>Type:</strong> <TypePill type={selected.event_type} /></span>
+              </div>
+              <button
+                className="proj-fin__delete-btn"
+                style={{ marginTop: '1.5rem', color: '#b91c1c', fontSize: '0.82rem', border: '1px solid #fca5a5', borderRadius: '0.4rem', padding: '0.4rem 0.9rem' }}
+                onClick={handleDelete}
+              >
+                Delete Event
+              </button>
+            </div>
+          )}
+          {detailTab === 'finances' && (
+            finLoading ? <p className="dash-panel__empty">Loading financials…</p> :
+            !financial ? <p className="dash-panel__empty">No financial data available.</p> : (
+              <div className="proj-fin">
+                <div className="proj-fin__header">
+                  <button className="proj-fin__edit-btn" onClick={openEditFinances}>Edit Finances</button>
+                </div>
+                <div className="proj-fin__section">
+                  <h3 className="proj-fin__section-title">EXPENSES</h3>
+                  {financial.expenses.length === 0 ? (
+                    <p className="dash-panel__empty">No expenses recorded.</p>
+                  ) : (
+                    <table className="dash-table">
+                      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Qty</th><th>Price</th><th>Location</th><th></th></tr></thead>
+                      <tbody>
+                        {financial.expenses.map((e) => (
+                          <tr key={e.id}>
+                            <td>{new Date(e.date_purchased).toLocaleDateString()}</td>
+                            <td>{e.description}</td>
+                            <td>{e.category}</td>
+                            <td>{e.quantity}</td>
+                            <td>₱{(e.price * e.quantity).toLocaleString()}</td>
+                            <td>{e.location}</td>
+                            <td>
+                              <button className="proj-fin__delete-btn" onClick={() => handleDeleteExpense(e.id)} title="Delete">✕</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                  <div className="proj-fin__total">TOTAL <strong>₱{financial.total_spent.toLocaleString()}</strong></div>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Edit Details modal */}
         {showEdit && (
           <div className="proj-modal-overlay" onClick={() => setShowEdit(false)}>
             <div className="proj-modal" onClick={(e) => e.stopPropagation()}>
@@ -222,6 +355,43 @@ export function AdminEventsPage() {
               <button className="proj-modal__save" onClick={handleEdit} disabled={editLoading}>
                 {editLoading ? 'Saving…' : 'Save'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Finances modal */}
+        {showEditFin && (
+          <div className="proj-modal-overlay" onClick={() => setShowEditFin(false)}>
+            <div className="proj-modal proj-modal--wide" onClick={(e) => e.stopPropagation()}>
+              <h2 className="proj-modal__title">Edit Finances</h2>
+              <div className="proj-modal__section">
+                <h3 className="proj-modal__section-title">Add Expense</h3>
+                <div className="proj-modal__grid">
+                  <label className="proj-modal__label">Description
+                    <input className="proj-modal__input" placeholder="e.g. Venue rental" value={newExpense.description} onChange={e => setNewExpense(f => ({ ...f, description: e.target.value }))} />
+                  </label>
+                  <label className="proj-modal__label">Category
+                    <input className="proj-modal__input" placeholder="e.g. Logistics" value={newExpense.category} onChange={e => setNewExpense(f => ({ ...f, category: e.target.value }))} />
+                  </label>
+                  <label className="proj-modal__label">Qty
+                    <input className="proj-modal__input" type="number" value={newExpense.quantity} onChange={e => setNewExpense(f => ({ ...f, quantity: e.target.value }))} />
+                  </label>
+                  <label className="proj-modal__label">Price per unit (₱)
+                    <input className="proj-modal__input" type="number" value={newExpense.price} onChange={e => setNewExpense(f => ({ ...f, price: e.target.value }))} />
+                  </label>
+                  <label className="proj-modal__label">Location
+                    <input className="proj-modal__input" placeholder="Where purchased" value={newExpense.location} onChange={e => setNewExpense(f => ({ ...f, location: e.target.value }))} />
+                  </label>
+                  <label className="proj-modal__label">Date
+                    <input className="proj-modal__input" type="date" value={newExpense.date_purchased} onChange={e => setNewExpense(f => ({ ...f, date_purchased: e.target.value }))} />
+                  </label>
+                </div>
+                {expenseError && <p className="proj-modal__error">{expenseError}</p>}
+                <button className="proj-modal__save" onClick={handleAddExpense} disabled={expenseLoading}>
+                  {expenseLoading ? 'Adding…' : '+ Add Expense'}
+                </button>
+              </div>
+              <button className="proj-modal__close" onClick={() => setShowEditFin(false)}>Done</button>
             </div>
           </div>
         )}
