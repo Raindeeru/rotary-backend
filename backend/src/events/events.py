@@ -6,11 +6,17 @@ from typing import List
 
 # Import your database, models, and dependencies
 from database.database import get_db
-from database.models import Event
+from database.models import Event, EventExpense
 from auth.login import require_admin, require_member_or_admin
 from auth.login import get_current_user
 from auth.public_user import PublicUser
-from .schemas import EventCreate, EventUpdate, EventResponse
+from .schemas import (EventCreate,
+                      EventUpdate,
+                      EventResponse,
+                      EventExpenseCreate,
+                      EventExpenseUpdate,
+                      EventExpenseResponse,
+                      EventFinancialBreakdownResponse)
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -85,3 +91,85 @@ async def delete_event(event_id: int, db: AsyncSession = Depends(get_db)):
     await db.delete(event)
     await db.commit()
     return {"message": "Event successfully deleted."}
+
+
+@router.get("/{event_id}/financials", response_model=EventFinancialBreakdownResponse, dependencies=[require_member_or_admin])
+async def get_event_financials(event_id: int, db: AsyncSession = Depends(get_db)):
+    """Members and Admins can view the itemized breakdown for a specific event."""
+    event = await db.get(Event, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    result = await db.execute(
+        select(EventExpense).where(EventExpense.event_id == event_id)
+    )
+    expenses = result.scalars().all()
+
+    total_spent = sum([exp.price * exp.quantity for exp in expenses])
+
+    # Returning a raw dict to avoid that Pydantic validation error!
+    return {
+        "event_id": event.id,
+        "total_spent": total_spent,
+        "expenses": expenses 
+    }
+
+
+@router.post("/{event_id}/financials", 
+             response_model=EventExpenseResponse,
+             dependencies=[require_admin])
+async def add_event_financial_record(
+    event_id: int, 
+    expense_in: EventExpenseCreate, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Administrators can add financial records to an event."""
+    event = await db.get(Event, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    new_expense = EventExpense(**expense_in.model_dump(), event_id=event_id)
+    db.add(new_expense)
+    await db.commit()
+    await db.refresh(new_expense)
+    
+    return new_expense
+
+@router.put("/{event_id}/financials/{expense_id}", response_model=EventExpenseResponse, dependencies=[require_admin])
+async def update_event_financial_record(
+    event_id: int, 
+    expense_id: int, 
+    expense_in: EventExpenseUpdate, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Administrators can update financial records for an event."""
+    expense = await db.get(EventExpense, expense_id)
+    
+    if not expense or expense.event_id != event_id:
+        raise HTTPException(status_code=404, detail="Expense record not found for this event")
+
+    update_data = expense_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(expense, key, value)
+
+    await db.commit()
+    await db.refresh(expense)
+    
+    return expense
+
+@router.delete("/{event_id}/financials/{expense_id}", dependencies=[require_admin])
+async def delete_event_financial_record(
+    event_id: int, 
+    expense_id: int, 
+    db: AsyncSession = Depends(get_db)
+):
+    """Administrators can delete financial records from an event."""
+    expense = await db.get(EventExpense, expense_id)
+    
+    if not expense or expense.event_id != event_id:
+        raise HTTPException(status_code=404, detail="Expense record not found for this event")
+
+    await db.delete(expense)
+    await db.commit()
+    
+    return {"message": "Event financial record successfully deleted."}

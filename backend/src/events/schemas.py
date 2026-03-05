@@ -11,6 +11,45 @@ ALLOWED_EVENT_TYPES = [
     "Rescheduling Notice"
 ]
 
+# schemas/events.py (Add these to the bottom of your events schemas)
+from pydantic import BaseModel, computed_field, ConfigDict
+from datetime import datetime
+from typing import List, Optional
+
+class EventExpenseBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    date_purchased: datetime
+    location: str
+    description: str
+    category: str
+    quantity: int
+    price: float
+
+class EventExpenseCreate(EventExpenseBase):
+    pass
+
+class EventExpenseUpdate(BaseModel):
+    date_purchased: Optional[datetime] = None
+    location: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    quantity: Optional[int] = None
+    price: Optional[float] = None
+
+class EventExpenseResponse(EventExpenseBase):
+    id: int
+    event_id: int
+
+    @computed_field
+    def total(self) -> float:
+        return self.quantity * self.price
+
+class EventFinancialBreakdownResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    event_id: int
+    total_spent: float
+    expenses: List[EventExpenseResponse]
+
 class EventBase(BaseModel):
     title: str
     description: str
