@@ -114,6 +114,8 @@ function MembersTab() {
   // Invite form state
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [vocation, setVocation] = useState('');
   const [role, setRole] = useState('Member');
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -141,7 +143,13 @@ function MembersTab() {
 
     setInviteLoading(true);
     try {
-      const query = new URLSearchParams({ username: username.trim(), email: email.trim(), role });
+      const query = new URLSearchParams({ 
+          username: username.trim(), 
+          email: email.trim(), 
+          role,
+          name: name.trim(),
+          vocation: vocation.trim()
+      });
       const res = await fetch(`${API_BASE}/members/invite?${query}`, {
         method: 'POST',
         headers: authHeaders(),
@@ -173,6 +181,29 @@ function MembersTab() {
       <div className="dash-panel" style={{ marginBottom: '1.5rem' }}>
         <h3 className="dash-panel__title">Invite New Member</h3>
         <form onSubmit={handleInvite} className="dash-invite-form">
+         <div className="dash-invite-form__row" style={{ marginBottom: '1rem' }}>
+             <div className="dash-invite-form__field">
+              <label className="dash-invite-form__label">Full Name</label>
+              <input
+                className="dash-invite-form__input"
+                type="text"
+                placeholder="Juan dela Cruz"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="dash-invite-form__field">
+              <label className="dash-invite-form__label">Vocation</label>
+              <input
+                className="dash-invite-form__input"
+                type="text"
+                placeholder="e.g. Designer"
+                value={vocation}
+                onChange={(e) => setVocation(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="dash-invite-form__row">
             <div className="dash-invite-form__field">
               <label className="dash-invite-form__label">Username</label>
