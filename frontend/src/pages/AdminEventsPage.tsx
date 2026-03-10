@@ -14,6 +14,7 @@ type FullEvent = {
   date: string;
   event_type: string;
   admin_id: number | null;
+  image_path?: string;
 };
 
 type Expense = {
@@ -78,19 +79,40 @@ export function AdminEventsPage() {
     return localStorage.getItem(`event_img_${id}`) ?? null;
   }
 
-  function handleEventImgUpload(id: number, e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      localStorage.setItem(`event_img_${id}`, result);
-      setEvents(prev => [...prev]);
-      if (selected?.id === id) setSelected(prev => prev ? { ...prev } : null);
-    };
-    reader.readAsDataURL(file);
-  }
+  async function handleEventImgUpload(id: number, e: React.ChangeEvent<HTMLInputElement>) {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+          const res = await fetch(`${API_BASE}/events/${id}/image`, {
+              method: 'PUT',
+              headers: authHeaders(), // Browser sets Content-Type for FormData
+                  body: formData,
+          });
+
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.detail || 'Upload failed');
+          }
+
+          const data = await res.json();
+          // Support both raw string or object responses
+          const finalPath = typeof data === 'string' ? data : data.image_path;
+
+          // Update local state
+          setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, image_path: finalPath } : ev));
+          if (selected?.id === id) {
+              setSelected(prev => prev ? { ...prev, image_path: finalPath } : null);
+          }
+
+          alert("Event image updated!");
+      } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error uploading image');
+      }
+  }
   async function loadEvents() {
     try {
       const res = await fetch(`${API_BASE}/events/`, { headers: authHeaders() });
@@ -242,7 +264,7 @@ export function AdminEventsPage() {
       <div className="proj-detail">
         <div
           className="proj-detail__banner"
-          style={getEventImg(selected.id) ? { backgroundImage: `url(${getEventImg(selected.id)})` } : undefined}
+          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
         >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
@@ -328,8 +350,8 @@ export function AdminEventsPage() {
               <h2 className="proj-modal__title">Edit Event</h2>
               <label className="proj-modal__label">Event Photo
                 <div className="proj-modal__photo-upload">
-                  {getEventImg(selected.id) && (
-                    <img src={getEventImg(selected.id)!} className="proj-modal__photo-preview" alt="Event" />
+                  {selected.image_path && (
+                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Event" />
                   )}
                   <label className="proj-modal__photo-btn">
                     {getEventImg(selected.id) ? 'Change Photo' : 'Upload Photo'}
@@ -438,8 +460,8 @@ export function AdminEventsPage() {
           <div className="dash-loading">Loading…</div>
         ) : events.map((ev) => (
           <div key={ev.id} className="proj-card" onClick={() => openEvent(ev)}>
-            {getEventImg(ev.id) && (
-              <div className="proj-card__img" style={{ backgroundImage: `url(${getEventImg(ev.id)})` }} />
+            {ev.image_path && (
+                <div className="proj-card__img" style={{ backgroundImage: `url(${API_BASE}${ev.image_path})` }} />
             )}
             <div className="proj-card__title">{ev.title}</div>
             <div className="proj-card__desc">

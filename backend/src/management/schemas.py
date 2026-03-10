@@ -1,9 +1,7 @@
-# schemas.py (or inside your projects router)
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 
-# FR-8 & FR-9: Project details and allowed statuses
 class ProjectBase(BaseModel):
     title: str
     description: str
@@ -11,6 +9,7 @@ class ProjectBase(BaseModel):
     start_date: datetime
     end_date: datetime
     status: str
+    image_path: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
     pass
@@ -21,7 +20,8 @@ class ProjectUpdate(BaseModel):
     location: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    status: Optional[str] = None # FR-14: Admin can update status
+    status: Optional[str] = None
+    budget: Optional[float] = None
 
 class ExpenseItem(BaseModel):
     id: int

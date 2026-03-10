@@ -15,6 +15,7 @@ type FullProject = {
   status: string;
   total_expenses: number;
   remaining_balance: number;
+  image_path?: string;
 };
 
 type Expense = {
@@ -73,23 +74,45 @@ export function AdminProjectsPage() {
     return localStorage.getItem('proj_cover_img') ?? null;
   });
 
-  function getProjectImg(id: number): string | null {
-    return localStorage.getItem(`proj_img_${id}`) ?? null;
-  }
+  useEffect(() => {
+      console.log("Current Selected Project:", selected);
+  }, [selected]);
 
-  function handleProjectImgUpload(id: number, e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      localStorage.setItem(`proj_img_${id}`, result);
-      setProjects(prev => [...prev]);
-      if (selected?.id === id) setSelected(prev => prev ? { ...prev } : null);
-    };
-    reader.readAsDataURL(file);
-  }
+  async function handleProjectImgUpload(id: number, e: React.ChangeEvent<HTMLInputElement>) {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+          const res = await fetch(`${API_BASE}/projects/${id}/image`, {
+              method: 'PUT',
+              headers: authHeaders(),
+              body: formData,
+          });
+
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.detail || 'Upload failed');
+          }
+
+          const data = await res.json();
+
+          // FIX: Extract the string even if the backend wraps it in an object
+          const finalPath = typeof data === 'string' ? data : data.image_path;
+
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, image_path: finalPath } : p));
+
+      if (selected?.id === id) {
+          setSelected(prev => prev ? { ...prev, image_path: finalPath } : null);
+      }
+
+      alert("Image uploaded successfully!");
+      } catch (err) {
+          alert(err instanceof Error ? err.message : 'Error uploading image');
+      }
+  }
   async function loadProjects() {
     try {
       const res = await fetch(`${API_BASE}/projects/`);
@@ -247,10 +270,10 @@ export function AdminProjectsPage() {
   if (selected) {
     return (
       <div className="proj-detail">
-        <div
+          <div
           className="proj-detail__banner"
-          style={getProjectImg(selected.id) ? { backgroundImage: `url(${getProjectImg(selected.id)})` } : undefined}
-        >
+          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
+          >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
             <div className="proj-detail__banner-info">
@@ -344,12 +367,17 @@ export function AdminProjectsPage() {
               <h2 className="proj-modal__title">Edit Project</h2>
               <label className="proj-modal__label">Project Photo
                 <div className="proj-modal__photo-upload">
-                  {getProjectImg(selected.id) && (
-                    <img src={getProjectImg(selected.id)!} className="proj-modal__photo-preview" alt="Project" />
+                  {selected.image_path && (
+                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Project" />
                   )}
                   <label className="proj-modal__photo-btn">
-                    {getProjectImg(selected.id) ? 'Change Photo' : 'Upload Photo'}
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleProjectImgUpload(selected.id, e)} />
+                      {selected.image_path ? 'Change Photo' : 'Upload Photo'}
+                      <input 
+                      type="file" 
+                      accept="image/*" 
+                      style={{ display: 'none' }} 
+                      onChange={e => handleProjectImgUpload(selected.id, e)} 
+                  />
                   </label>
                 </div>
               </label>
@@ -466,8 +494,11 @@ export function AdminProjectsPage() {
           <div className="dash-loading">Loading…</div>
         ) : projects.map((p) => (
           <div key={p.id} className="proj-card" onClick={() => openProject(p)}>
-            {getProjectImg(p.id) && (
-              <div className="proj-card__img" style={{ backgroundImage: `url(${getProjectImg(p.id)})` }} />
+            {p.image_path && (
+                <div 
+                className="proj-card__img" 
+                style={{ backgroundImage: `url(${API_BASE}${p.image_path})` }} 
+                />
             )}
             <div className="proj-card__title">{p.title}</div>
             <div className="proj-card__desc">{p.description}</div>

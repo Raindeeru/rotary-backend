@@ -55,6 +55,8 @@ class EventBase(BaseModel):
     description: str
     date: datetime
     event_type: str 
+    budget: float = 0.0 # Added to match your DB earlier
+    image_path: Optional[str] = None # <--- ADD THIS
 
     @field_validator('event_type')
     def validate_event_type(cls, v):
@@ -70,13 +72,12 @@ class EventUpdate(BaseModel):
     description: Optional[str] = None
     date: Optional[datetime] = None
     event_type: Optional[str] = None
-
-    @field_validator('event_type')
-    def validate_event_type(cls, v):
-        if v is not None and v not in ALLOWED_EVENT_TYPES:
-            raise ValueError(f"event_type must be one of {ALLOWED_EVENT_TYPES}")
-        return v
+    budget: Optional[float] = None # Added for consistency
+    image_path: Optional[str] = None # <--- ADD THIS
 
 class EventResponse(EventBase):
     id: int
     admin_id: Optional[int]
+    
+    # Ensure this model can read from SQLAlchemy objects
+    model_config = ConfigDict(from_attributes=True)

@@ -28,6 +28,7 @@ class Project(Base):
     end_date: Mapped[datetime.datetime]
     status: Mapped[str] = mapped_column(default="Planned")
     budget: Mapped[float] = mapped_column(default=0.0)
+    image_path: Mapped[Optional[str]] = mapped_column(nullable=True)
 
     admin_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
 
@@ -44,7 +45,6 @@ class ProjectExpense(Base):
     location: Mapped[str]
     date_purchased: Mapped[datetime.datetime]
 
-    image_path: Mapped[str]
 
 class Event(Base):
     __tablename__ = "events"
@@ -53,7 +53,8 @@ class Event(Base):
     description: Mapped[str]
     date: Mapped[datetime.datetime]
     event_type: Mapped[str] = mapped_column(String(50))
-    budget: Mapped[float] = mapped_column(default=0.0)
+    budget: Mapped[float] = mapped_column(default=0.0, server_default="0.0")
+    image_path: Mapped[Optional[str]] = mapped_column(nullable=True)
 
     admin_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
 
