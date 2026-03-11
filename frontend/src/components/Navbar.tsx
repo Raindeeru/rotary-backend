@@ -8,7 +8,10 @@ export function Navbar() {
           <img src="/logo_rotary.jpg" alt="Rotary Club of San Fernando" className="navbar__logo-img" />
           <span className="navbar__title">Rotary Club of San Fernando (P)</span>
         </Link>
-        <Link to="/login" className="navbar__login">Login</Link>
+        <nav className="navbar__nav">
+          <Link to="/about" className="navbar__nav-link">About</Link>
+          <Link to="/login" className="navbar__login">Login</Link>
+        </nav>
       </div>
     </header>
   );

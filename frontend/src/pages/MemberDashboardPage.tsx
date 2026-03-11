@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MemberNavbar, MemberTab } from '../components/MemberNavbar';
 import { ProfileTab } from '../components/ProfileTab';
+import { AboutPage } from './AboutPage';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -362,6 +363,9 @@ export function MemberDashboardPage() {
               <p className="dashboard__subtitle">Upcoming and past club events.</p>
               <EventsTab />
             </>
+          )}
+          {activeTab === 'about' && (
+            <AboutPage />
           )}
           {activeTab === 'profile' && (
             <>

@@ -3,6 +3,7 @@ import { AdminNavbar, AdminTab } from '../components/AdminNavbar';
 import { ProfileTab } from '../components/ProfileTab';
 import { AdminProjectsPage } from './AdminProjectsPage';
 import { AdminEventsPage } from './AdminEventsPage';
+import { AboutPage } from './AboutPage';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -490,6 +491,9 @@ export function AdminDashboardPage() {
           )}
           {activeTab === 'events' && (
             <AdminEventsPage />
+          )}
+          {activeTab === 'about' && (
+            <AboutPage />
           )}
           {activeTab === 'profile'  && (
             <>

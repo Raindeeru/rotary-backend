@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { MemberDashboardPage } from './pages/MemberDashboardPage';
+import { AboutPage } from './pages/AboutPage';
 
 type BackendStatus = { 'Connection Status'?: string };
 
@@ -39,6 +40,7 @@ function AppShell() {
 
       <Routes>
         <Route path="/" element={<HomePage backendStatus={backendStatus} backendError={backendError} />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route

@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 
-export type AdminTab = 'home' | 'members' | 'projects' | 'events' | 'profile';
+export type AdminTab = 'home' | 'members' | 'projects' | 'events' | 'about' | 'profile';
 
 const TABS: { id: AdminTab; label: string }[] = [
   { id: 'home',     label: 'Home' },
   { id: 'members',  label: 'Members' },
   { id: 'projects', label: 'Projects' },
   { id: 'events',   label: 'Events' },
+  { id: 'about',    label: 'About' },
   { id: 'profile',  label: 'Profile' },
 ];
 
