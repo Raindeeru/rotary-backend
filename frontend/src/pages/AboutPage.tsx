@@ -120,18 +120,17 @@ export function AboutPage() {
           </p>
           <div className="about-aof__grid">
             {[
-              { icon: '🕊️', title: 'Peace & Conflict Prevention', desc: 'Building a culture of peace through dialogue, tolerance, and understanding.' },
-              { icon: '💉', title: 'Disease Prevention & Treatment', desc: 'Strengthening health systems and eradicating preventable diseases.' },
-              { icon: '💧', title: 'Water, Sanitation & Hygiene', desc: 'Providing clean water and sanitation to underserved communities.' },
-              { icon: '👶', title: 'Maternal & Child Health', desc: 'Reducing preventable deaths and improving care for mothers and infants.' },
-              { icon: '📚', title: 'Basic Education & Literacy', desc: 'Helping children and adults gain the literacy skills they need to succeed.' },
-              { icon: '🌱', title: 'Community Economic Development', desc: 'Creating sustainable livelihoods and economic opportunities for all.' },
-              { icon: '🌍', title: 'Environment', desc: 'Protecting the natural environment through conservation and education.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="about-aof__card">
-                <span className="about-aof__icon">{icon}</span>
-                <h3 className="about-aof__title">{title}</h3>
-                <p className="about-aof__desc">{desc}</p>
+                { title: 'Peace & Conflict Prevention', desc: 'Building a culture of peace through dialogue, tolerance, and understanding.' },
+                { title: 'Disease Prevention & Treatment', desc: 'Strengthening health systems and eradicating preventable diseases.' },
+                { title: 'Water, Sanitation & Hygiene', desc: 'Providing clean water and sanitation to underserved communities.' },
+                { title: 'Maternal & Child Health', desc: 'Reducing preventable deaths and improving care for mothers and infants.' },
+                { title: 'Basic Education & Literacy', desc: 'Helping children and adults gain the literacy skills they need to succeed.' },
+                { title: 'Community Economic Development', desc: 'Creating sustainable livelihoods and economic opportunities for all.' },
+                { title: 'Environment', desc: 'Protecting the natural environment through conservation and education.' },
+                ].map(({ title, desc }) => (
+               <div key={title} className="about-aof__card">
+               <h3 className="about-aof__title">{title}</h3>
+               <p className="about-aof__desc">{desc}</p>
               </div>
             ))}
           </div>
