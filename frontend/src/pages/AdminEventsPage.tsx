@@ -264,7 +264,7 @@ export function AdminEventsPage() {
       <div className="proj-detail">
         <div
           className="proj-detail__banner"
-          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
+          style={selected.image_path ? { backgroundImage: `url(${selected.image_path})` } : undefined}
         >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
@@ -351,7 +351,7 @@ export function AdminEventsPage() {
               <label className="proj-modal__label">Event Photo
                 <div className="proj-modal__photo-upload">
                   {selected.image_path && (
-                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Event" />
+                      <img src={`${selected.image_path}`} className="proj-modal__photo-preview" alt="Event" />
                   )}
                   <label className="proj-modal__photo-btn">
                     {getEventImg(selected.id) ? 'Change Photo' : 'Upload Photo'}
@@ -461,7 +461,7 @@ export function AdminEventsPage() {
         ) : events.map((ev) => (
           <div key={ev.id} className="proj-card" onClick={() => openEvent(ev)}>
             {ev.image_path && (
-                <div className="proj-card__img" style={{ backgroundImage: `url(${API_BASE}${ev.image_path})` }} />
+                <div className="proj-card__img" style={{ backgroundImage: `url(${ev.image_path})` }} />
             )}
             <div className="proj-card__title">{ev.title}</div>
             <div className="proj-card__desc">

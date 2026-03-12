@@ -19,14 +19,8 @@ db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
 db_port = os.getenv('DB_PORT')
 
-# engine = create_async_engine(f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
+engine = create_async_engine("postgresql+asyncpg://postgres.cyadjcztrajbevfypmwd:DumalaogWebsys@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
-
-engine = create_async_engine(
-    "sqlite+aiosqlite:///./test.db",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool, 
-)
 
 
 async def create_tables() -> None:

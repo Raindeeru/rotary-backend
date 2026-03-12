@@ -37,13 +37,13 @@ async def update_project_image(
 
     try:
         file_url = await storage.upload(file, file.filename)
-        project.image_path = file_url
+        project.image_path = storage.get_url(file_url)
         await db.commit()
         await db.refresh(project)
         return {
             "message": "Image uploaded successfully",
             "project_id": project_id,
-            "image_url": file_url
+            "image_url": storage.get_url(file_url)
         }
 
     except Exception as e:
@@ -79,13 +79,13 @@ async def update_event_image(
 
     try:
         file_url = await storage.upload(file, file.filename)
-        event.image_path = file_url
+        event.image_path = storage.get_url(file_url)
         await db.commit()
         await db.refresh(event)
         return {
             "message": "Image uploaded successfully",
             "event_id": event_id,
-            "image_url": file_url
+            "image_url": storage.get_url(file_url)
         }
 
     except Exception as e:

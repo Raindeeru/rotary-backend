@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from abc import ABC, abstractmethod
 from fastapi import Depends
 from typing import Annotated
+from supabase import create_client, Client
 
 
 class StorageProvider(ABC):
@@ -42,16 +43,46 @@ class LocalStorage(StorageProvider):
         if os.path.exists(path):
             os.remove(path)
 
-# dagdag lang dito ng mga cloud storage shit if kailangan baka supabase for testing
 
-######
+class SupabaseStorage(StorageProvider):
+    def __init__(self):
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_KEY")
+        self.supabase: Client = create_client(url, key)
+        self.bucket_name = os.getenv("SUPABASE_BUCKET_NAME", "images")
+
+    async def upload(self, file, filename: str) -> str:
+        path = f"tasks/{filename}"
+        content = await file.read()
+        
+        self.supabase.storage.from_(self.bucket_name).upload(
+            file=content,
+            path=path,
+            file_options={"content-type": file.content_type}
+        )
+        return path
+
+    def get_url(self, path: str) -> str:
+        # Supabase generates the public URL for you
+        return self.supabase.storage.from_(self.bucket_name).get_public_url(path)
+
+    async def delete(self, filename: str):
+        # Supabase takes a list of paths to delete
+        self.supabase.storage.from_(self.bucket_name).remove([filename])
 
 
 load_dotenv()
 
 
 def get_storage() -> StorageProvider:
-    return LocalStorage()
+    storage_type = os.getenv('STORAGE_TYPE', 'LOCAL')
+    match storage_type:
+        case 'SUPABASE':
+            return SupabaseStorage()
+        case 'LOCAL':
+            return LocalStorage()
+        case _:
+            return LocalStorage()
 
 
 StorageDep = Annotated[StorageProvider, Depends(get_storage)]

@@ -44,3 +44,13 @@ VALUES
 (1, 'March General Assembly', 'Monthly meeting to discuss upcoming community projects.', '2026-03-15 18:00:00', 'Meeting', 1),
 (2, 'New Member Welcoming', 'Welcoming Alice and others to the club.', '2026-03-22 19:00:00', 'Induction Ceremony', 1),
 (3, 'Water Filter Setup Day', 'Volunteers needed to help install filters in Makati.', '2026-04-05 08:00:00', 'Project Schedule', 1);
+
+-- ==========================================
+-- 5. RESYNC POSTGRES SEQUENCES
+-- ==========================================
+-- This prevents the "duplicate key" error when adding new records via the API
+
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects));
+SELECT setval('project_expenses_id_seq', (SELECT MAX(id) FROM project_expenses));
+SELECT setval('events_id_seq', (SELECT MAX(id) FROM events));

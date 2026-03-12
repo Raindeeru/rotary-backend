@@ -5,9 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "rotary"
 version = "0.0.1"
+
 dependencies = [
-    "fastapi",
-    "sqlalchemy[asyncio]",
+    "fastapi", #pinalit yung flask
+    "sqlalchemy[asyncio]", #pinalit yung peewee
     "openpyxl",
     "asyncpg",
     "dotenv",
@@ -18,7 +19,7 @@ dependencies = [
     "python-multipart",
     "requests",
     "python-dateutil",
-    "aiosqlite"
+    "supabase"
 ]
 
 [tool.setuptools]

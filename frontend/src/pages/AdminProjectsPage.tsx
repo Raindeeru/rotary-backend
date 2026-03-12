@@ -272,7 +272,7 @@ export function AdminProjectsPage() {
       <div className="proj-detail">
           <div
           className="proj-detail__banner"
-          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
+          style={selected.image_path ? { backgroundImage: `url(${selected.image_path})` } : undefined}
           >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
@@ -368,7 +368,7 @@ export function AdminProjectsPage() {
               <label className="proj-modal__label">Project Photo
                 <div className="proj-modal__photo-upload">
                   {selected.image_path && (
-                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Project" />
+                      <img src={`${selected.image_path}`} className="proj-modal__photo-preview" alt="Project" />
                   )}
                   <label className="proj-modal__photo-btn">
                       {selected.image_path ? 'Change Photo' : 'Upload Photo'}
@@ -497,7 +497,7 @@ export function AdminProjectsPage() {
             {p.image_path && (
                 <div 
                 className="proj-card__img" 
-                style={{ backgroundImage: `url(${API_BASE}${p.image_path})` }} 
+                style={{ backgroundImage: `url(${p.image_path})` }} 
                 />
             )}
             <div className="proj-card__title">{p.title}</div>
