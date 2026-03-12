@@ -10,7 +10,6 @@ from auth.login import require_admin, require_member_or_admin
 from auth.login import get_current_user
 from auth.public_user import PublicUser
 
-# Import your dependencies and helpers
 from auth.login import (get_current_user,
                         authenticate_user,
                         get_password_hash,
@@ -20,16 +19,13 @@ from auth.login import (get_current_user,
 
 from pydantic import BaseModel, Field
 
-# schemas/members.py (or inside your router file)
 
 
-# FR-22: Public view (Name and Vocation ONLY)
 class MemberPublicResponse(BaseModel):
     name: str
     vocation: str
 
 
-# FR-23: Full view for logged-in Members
 class MemberFullResponse(MemberPublicResponse):
     id: int
     username: str
@@ -38,14 +34,11 @@ class MemberFullResponse(MemberPublicResponse):
     status: str
 
 
-# FR-24: What a member is allowed to update on their own profile
 class MemberProfileUpdate(BaseModel):
     name: Optional[str] = None
     vocation: Optional[str] = None
     email: Optional[str] = None
 
-
-# FR-25: What an admin is allowed to update on someone else
 class AdminMemberUpdate(MemberProfileUpdate):
     role: Optional[str] = None
     status: Optional[str] = None
@@ -146,7 +139,6 @@ async def change_password(
 @router.get("/public", response_model=List[MemberPublicResponse])
 async def get_public_directory(db: AsyncSession = Depends(get_db)):
     """FR-22: Public users view a basic directory (name and vocation only)."""
-    # We only want to show Active members in the directory
     result = await db.execute(select(User).where(User.status == "Active"))
     members = result.scalars().all()
     return members
@@ -160,7 +152,6 @@ async def get_full_directory(
     """FR-23: Members view the full directory and can search by vocation."""
     query = select(User)
     
-    # If a vocation search term is provided, filter the query
     if vocation:
         query = query.where(User.vocation.ilike(f"%{vocation}%"))
         
@@ -174,7 +165,6 @@ async def update_own_profile(
     db: AsyncSession = Depends(get_db)
 ):
     """FR-24: Members shall be able to update their own profile information."""
-    # Fetch the actual database record for the logged-in user
     user = await db.get(User, current_user.id)
     
     update_data = profile_data.model_dump(exclude_unset=True)

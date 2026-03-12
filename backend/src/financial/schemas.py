@@ -1,14 +1,26 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 from datetime import datetime
 from typing import List, Optional
 
+def strip_tz(v):
+    if isinstance(v, str):
+        v = datetime.fromisoformat(v.replace("Z", "+00:00"))
+    if isinstance(v, datetime) and v.tzinfo:
+        return v.replace(tzinfo=None)
+    return v
+
 class ExpenseBase(BaseModel):
     date_purchased: datetime
-    location: str          # Purchased Where
-    description: str       # Item/Materials
-    category: str          # Optional, but good for filtering
+    location: str 
+    description: str 
+    category: str 
     quantity: int
     price: float
+
+    @field_validator("date_purchased", mode="before")
+    @classmethod
+    def clean_date(cls, v):
+        return strip_tz(v)
 
 class ExpenseCreate(ExpenseBase):
     pass
@@ -20,6 +32,13 @@ class ExpenseUpdate(BaseModel):
     category: Optional[str] = None
     quantity: Optional[int] = None
     price: Optional[float] = None
+
+    @field_validator("date_purchased", mode="before")
+    @classmethod
+    def clean_optional_date(cls, v):
+        if v is not None:
+            return strip_tz(v)
+        return v
 
 class ExpenseItemResponse(ExpenseBase):
     id: int

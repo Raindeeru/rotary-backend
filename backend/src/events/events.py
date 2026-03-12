@@ -1,10 +1,8 @@
-# routers/events.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
 
-# Import your database, models, and dependencies
 from database.database import get_db
 from database.models import Event, EventExpense
 from auth.login import require_admin, require_member_or_admin
@@ -20,7 +18,6 @@ from .schemas import (EventCreate,
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
-# --- MEMBER / READ-ONLY ROUTES (FR-28, FR-29) ---
 
 
 @router.get("/", response_model=List[EventResponse], dependencies=[require_member_or_admin])
@@ -41,7 +38,6 @@ async def get_event(event_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
-# --- ADMINISTRATOR ROUTES (FR-26, FR-30) ---
 
 
 @router.post("/", response_model=EventResponse)
@@ -53,7 +49,7 @@ async def create_event(
     """FR-26 & FR-27: Administrators can create categorized events."""
     new_event = Event(
         **event_in.model_dump(),
-        admin_id=current_admin.id  # Automatically track which admin created it
+        admin_id=current_admin.id  
     )
     db.add(new_event)
     await db.commit()
@@ -105,7 +101,6 @@ async def get_event_financials(event_id: int, db: AsyncSession = Depends(get_db)
     expenses = result.scalars().all()
 
     total_spent = sum([exp.price * exp.quantity for exp in expenses])
-    # Now this calculation is actually possible:
     remaining_balance = event.budget - total_spent
 
     return {

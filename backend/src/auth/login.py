@@ -10,7 +10,6 @@ from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from sqlalchemy import select
 
-# Import your actual database session and models
 from database.database import AsyncSessionLocal
 from database.models import User
 from .public_user import PublicUser
@@ -18,7 +17,6 @@ from typing import List
 
 load_dotenv()
 
-# SECRET_KEY = os.getenv('SECRET_KEY')
 SECRET_KEY = '1f3bd0837cf2fccab7e274cfdc22aa2dc9a0191f352740ae4012279a4a985ec5'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440

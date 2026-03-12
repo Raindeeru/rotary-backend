@@ -1,4 +1,3 @@
-# routers/projects.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -10,7 +9,6 @@ from auth.login import require_admin
 from auth.public_user import PublicUser
 from fastapi.security import OAuth2PasswordBearer
 
-# Ensure these schemas actually have image_path: Optional[str] = None
 from .schemas import (
     ProjectCreate,
     ProjectMemberResponse,
@@ -31,7 +29,6 @@ async def get_optional_user(token: str = Depends(oauth2_scheme_optional)):
             return None
     return None
 
-# --- PUBLIC / MEMBER READ ROUTES ---
 
 @router.get("/", response_model=List[ProjectPublicResponse])
 async def list_projects(db: AsyncSession = Depends(get_db)):
@@ -47,7 +44,6 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
         expenses = exp_result.scalars().all()
         
         total_spent = sum([exp.price * exp.quantity for exp in expenses])
-        # Use actual project budget if available, else fallback
         budget = getattr(project, 'budget', 10000.0)
         remaining = budget - total_spent
         
@@ -59,7 +55,7 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
             "start_date": project.start_date,
             "end_date": project.end_date,
             "status": project.status,
-            "image_path": project.image_path,  # <--- CRITICAL FIX: ADD THIS
+            "image_path": project.image_path,  
             "total_expenses": total_spent,
             "remaining_balance": remaining
         }
@@ -86,7 +82,6 @@ async def get_project_details(
     budget = getattr(project, 'budget', 10000.0)
     remaining = budget - total_spent
 
-    # Assemble the base data including the missing image_path
     base_data = {
         "id": project.id,
         "title": project.title,
@@ -95,7 +90,7 @@ async def get_project_details(
         "start_date": project.start_date,
         "end_date": project.end_date,
         "status": project.status,
-        "image_path": project.image_path,  # <--- CRITICAL FIX: ADD THIS
+        "image_path": project.image_path,  
         "total_expenses": total_spent,
         "remaining_balance": remaining
     }
@@ -106,7 +101,6 @@ async def get_project_details(
     
     return ProjectPublicResponse(**base_data)
 
-# --- ADMINISTRATOR ROUTES ---
 
 @router.post("/", dependencies=[require_admin])
 async def create_project(project_in: ProjectCreate, db: AsyncSession = Depends(get_db)):

@@ -63,11 +63,9 @@ class SupabaseStorage(StorageProvider):
         return path
 
     def get_url(self, path: str) -> str:
-        # Supabase generates the public URL for you
         return self.supabase.storage.from_(self.bucket_name).get_public_url(path)
 
     async def delete(self, filename: str):
-        # Supabase takes a list of paths to delete
         self.supabase.storage.from_(self.bucket_name).remove([filename])
 
 
