@@ -1,8 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginRequest } from '../lib/api';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 export function LoginPage() {
   const navigate = useNavigate();

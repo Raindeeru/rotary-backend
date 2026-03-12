@@ -21,7 +21,7 @@ function AppShell() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('http://localhost:8000/', { signal: controller.signal })
+    fetch('https://rotary-backend-wixk.onrender.com/', { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return (await res.json()) as BackendStatus;

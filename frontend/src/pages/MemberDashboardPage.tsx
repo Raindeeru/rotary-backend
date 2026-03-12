@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { MemberNavbar, MemberTab } from '../components/MemberNavbar';
 import { ProfileTab } from '../components/ProfileTab';
 import { AboutPage } from './AboutPage';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 function getToken() { return localStorage.getItem('rotary_access_token') ?? ''; }
 function authHeaders() { return { Authorization: `Bearer ${getToken()}` }; }

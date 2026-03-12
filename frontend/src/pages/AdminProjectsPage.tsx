@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 function getToken() { return localStorage.getItem('rotary_access_token') ?? ''; }
 function authHeaders() { return { Authorization: `Bearer ${getToken()}` }; }
@@ -35,6 +34,12 @@ type Financial = {
   remaining_balance: number;
   expenses: Expense[];
 };
+
+function getImageUrl(path?: string | null) {
+  if (!path) return undefined;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${API_BASE}${path}`;
+}
 
 function StatusPill({ status }: { status: string }) {
   const cls = `proj-status proj-status--${status.toLowerCase()}`;
@@ -270,9 +275,9 @@ export function AdminProjectsPage() {
   if (selected) {
     return (
       <div className="proj-detail">
-          <div
+        <div
           className="proj-detail__banner"
-          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
+          style={selected.image_path ? { backgroundImage: `url(${getImageUrl(selected.image_path)})` } : undefined}
           >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
@@ -368,7 +373,7 @@ export function AdminProjectsPage() {
               <label className="proj-modal__label">Project Photo
                 <div className="proj-modal__photo-upload">
                   {selected.image_path && (
-                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Project" />
+                      <img src={getImageUrl(selected.image_path)} className="proj-modal__photo-preview" alt="Project" />
                   )}
                   <label className="proj-modal__photo-btn">
                       {selected.image_path ? 'Change Photo' : 'Upload Photo'}
@@ -447,7 +452,23 @@ export function AdminProjectsPage() {
                   {expenseLoading ? 'Adding…' : '+ Add Expense'}
                 </button>
               </div>
-              <button className="proj-modal__close" onClick={() => setShowEditFin(false)}>Done</button>
+              <div className="proj-modal__actions" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="proj-modal__close"
+                  onClick={() => setShowEditFin(false)}
+                  style={{ background: '#f3f4f6', borderColor: '#e5e7eb', color: '#374151' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="proj-modal__close"
+                  onClick={() => setShowEditFin(false)}
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -497,7 +518,7 @@ export function AdminProjectsPage() {
             {p.image_path && (
                 <div 
                 className="proj-card__img" 
-                style={{ backgroundImage: `url(${API_BASE}${p.image_path})` }} 
+                style={{ backgroundImage: `url(${getImageUrl(p.image_path)})` }} 
                 />
             )}
             <div className="proj-card__title">{p.title}</div>

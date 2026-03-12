@@ -32,7 +32,7 @@ export function HomePage({ backendError }: HomePageProps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('http://localhost:8000/members/public')
+    fetch('https://rotary-backend-wixk.onrender.com/members/public')
       .then((res) => res.json())
       .then((data) => { if (!cancelled) setMembers(data); })
       .catch((err: unknown) => {
@@ -50,8 +50,8 @@ export function HomePage({ backendError }: HomePageProps) {
           <h1 className="hero__title">Rotary Club of San Fernando, Pampanga</h1>
           <p className="hero__subtitle">We strive to improve the quality of life in Pampanga through accountability, partnership, and sustainable impact.</p>
           <div className="hero__actions">
-            <Link to="/register" className="hero__secondary-cta" style={{ textDecoration: 'none', display: 'inline-block' }}>
-              Join Us
+            <Link to="/about" className="hero__secondary-cta" style={{ textDecoration: 'none', display: 'inline-block' }}>
+              About Us
             </Link>
           </div>
         </div>

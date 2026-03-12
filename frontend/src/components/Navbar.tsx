@@ -9,6 +9,7 @@ export function Navbar() {
           <span className="navbar__title">Rotary Club of San Fernando (P)</span>
         </Link>
         <nav className="navbar__nav">
+          <Link to="/" className="navbar__nav-link">Home</Link>
           <Link to="/about" className="navbar__nav-link">About</Link>
           <Link to="/login" className="navbar__login">Login</Link>
         </nav>

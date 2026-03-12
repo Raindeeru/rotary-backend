@@ -4,8 +4,7 @@ import { ProfileTab } from '../components/ProfileTab';
 import { AdminProjectsPage } from './AdminProjectsPage';
 import { AdminEventsPage } from './AdminEventsPage';
 import { AboutPage } from './AboutPage';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 type Tab = AdminTab;
 

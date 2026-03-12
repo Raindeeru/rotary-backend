@@ -1,6 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 function getToken() { return localStorage.getItem('rotary_access_token') ?? ''; }
 function authHeaders(extra?: Record<string, string>) {

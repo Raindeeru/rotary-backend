@@ -436,8 +436,9 @@ body {
 
 /* ─── ADMIN DASHBOARD ────────────────────────────────── */
 .dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
   padding: 2.5rem 2rem 3rem;
 }
 
@@ -1919,8 +1920,9 @@ body {
 }
 
 .about-content-wrap {
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 .about-section__eyebrow {
@@ -1950,8 +1952,9 @@ body {
 .about-mv__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -2007,8 +2010,9 @@ body {
 }
 
 .about-fwt__inner {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 .about-fwt__intro {
@@ -2249,13 +2253,14 @@ body {
   font-size: 0.9rem;
   color: rgba(255,255,255,0.65);
   line-height: 1.75;
-  max-width: 560px;
+  max-width: 900px;
   margin-bottom: 2.5rem;
 }
 
 .about-join__actions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   gap: 3rem;
   flex-wrap: wrap;
 }

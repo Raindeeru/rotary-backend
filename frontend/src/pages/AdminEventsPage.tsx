@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../lib/api';
 
 function getToken() { return localStorage.getItem('rotary_access_token') ?? ''; }
 function authHeaders() { return { Authorization: `Bearer ${getToken()}` }; }
@@ -32,6 +31,12 @@ type EventFinancial = {
   total_spent: number;
   expenses: Expense[];
 };
+
+function getImageUrl(path?: string | null) {
+  if (!path) return undefined;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${API_BASE}${path}`;
+}
 
 function TypePill({ type }: { type: string }) {
   const map: Record<string, string> = {
@@ -264,7 +269,7 @@ export function AdminEventsPage() {
       <div className="proj-detail">
         <div
           className="proj-detail__banner"
-          style={selected.image_path ? { backgroundImage: `url(${API_BASE}${selected.image_path})` } : undefined}
+          style={selected.image_path ? { backgroundImage: `url(${getImageUrl(selected.image_path)})` } : undefined}
         >
           <div className="proj-detail__banner-inner">
             <button className="proj-detail__back" onClick={() => setSelected(null)}>← Back</button>
@@ -351,7 +356,7 @@ export function AdminEventsPage() {
               <label className="proj-modal__label">Event Photo
                 <div className="proj-modal__photo-upload">
                   {selected.image_path && (
-                      <img src={`${API_BASE}${selected.image_path}`} className="proj-modal__photo-preview" alt="Event" />
+                      <img src={getImageUrl(selected.image_path)} className="proj-modal__photo-preview" alt="Event" />
                   )}
                   <label className="proj-modal__photo-btn">
                     {getEventImg(selected.id) ? 'Change Photo' : 'Upload Photo'}
@@ -413,7 +418,23 @@ export function AdminEventsPage() {
                   {expenseLoading ? 'Adding…' : '+ Add Expense'}
                 </button>
               </div>
-              <button className="proj-modal__close" onClick={() => setShowEditFin(false)}>Done</button>
+              <div className="proj-modal__actions" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="proj-modal__close"
+                  onClick={() => setShowEditFin(false)}
+                  style={{ background: '#f3f4f6', borderColor: '#e5e7eb', color: '#374151' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="proj-modal__close"
+                  onClick={() => setShowEditFin(false)}
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -461,7 +482,7 @@ export function AdminEventsPage() {
         ) : events.map((ev) => (
           <div key={ev.id} className="proj-card" onClick={() => openEvent(ev)}>
             {ev.image_path && (
-                <div className="proj-card__img" style={{ backgroundImage: `url(${API_BASE}${ev.image_path})` }} />
+                <div className="proj-card__img" style={{ backgroundImage: `url(${getImageUrl(ev.image_path)})` }} />
             )}
             <div className="proj-card__title">{ev.title}</div>
             <div className="proj-card__desc">

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000';
+export const API_BASE = 'https://rotary-backend-wixk.onrender.com';
 
 function getToken(): string {
   return localStorage.getItem('rotary_access_token') ?? '';
